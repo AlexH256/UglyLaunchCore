@@ -1,7 +1,3 @@
-"""
-并行下载多文件模块
-依赖: pip install requests tqdm
-"""
 import requests
 from tqdm import tqdm
 import os
