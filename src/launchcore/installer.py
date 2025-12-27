@@ -1,21 +1,15 @@
-import configparser
 from .downloader import download_files as download_files, download_file as download_file
 
-config = configparser.ConfigParser()
-config.read('config.ini')
-
-list_url = config['download']['version_manifest']
-root_path = config['path']['root_path']
-
-
-def main(args) :
+def main(args, config) :
+    url = config['download']['version_manifest']
+    root = config['path']['root']
     if args.update :
-        update()
+        update(url, root)
     else :
         args.subparser.print_help()
 
-def update() :
-    out = download_file(list_url, root_path + '/versionlist/version_manifest.json', cache_dir = root_path + '/cache')
+def update(url, root) :
+    out = download_file(url, root + '/versionlist/version_manifest.json', cache_dir = root + '/cache')
     if out[0] :
         print("success")
     else :

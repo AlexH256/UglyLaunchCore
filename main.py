@@ -1,5 +1,11 @@
 import argparse
 from launchcore import installer
+import configparser
+
+def read_config() :
+    conf = configparser.ConfigParser()
+    conf.read('config.ini')
+    return conf
 
 def setup() :
     parser = argparse.ArgumentParser()
@@ -14,9 +20,10 @@ def setup() :
 
 def main() :
     parser = setup()
+    config = read_config()
     args = parser.parse_args()
 
-    args.func(args)
+    args.func(args, config)
 
 if __name__ == '__main__' :
     main()
