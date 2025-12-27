@@ -15,7 +15,7 @@ def main(args) :
         args.subparser.print_help()
 
 def update() :
-    out = download_file(list_url, root_path + '/versionlist/version_manifest.json')
+    out = download_file(list_url, root_path + '/versionlist/version_manifest.json', cache_dir = root_path + '/cache')
     if out[0] :
         print("success")
     else :
