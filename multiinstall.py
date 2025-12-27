@@ -82,6 +82,7 @@ def download_files(urls, dest_paths, max_workers=5, progress_bar=True):
     
     return results
 
+'''
 def main():
     """命令行接口示例"""
     import argparse
@@ -102,3 +103,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+'''
