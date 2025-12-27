@@ -85,6 +85,7 @@ def install_necc(root, id) :
             url_list.append(element['url'])
     
     num = len(url_list)
+    print(num)
     filess = []
     urlss = []
     multi = 32
