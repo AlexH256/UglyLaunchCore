@@ -6,7 +6,9 @@ def main(args, config) :
     root = config['path']['root']
     if args.update :
         update(url, root)
-    else :
+    if args.list != None :
+        list(root, args.list)
+    if False :
         args.subparser.print_help()
 
 def update(url, root) :
@@ -21,10 +23,10 @@ def read_json(file: str) :
         js = json.load(f)
     return js
 
-def list(list_file, type) :
+def list(root, type) :
     show = []
-    data = read_json(list_file)        
-    if type == 'nothing' :
+    data = read_json(root + '/versionlist/version_manifest.json')
+    if type == 'all' :
         for ver in data['versions'] :
             show.append('{:<25} {:<15}'.format(ver['id'], ver['type']))
 
