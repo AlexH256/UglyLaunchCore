@@ -1,5 +1,5 @@
 import argparse
-import installer
+from launchcore import installer
 
 def setup() :
     parser = argparse.ArgumentParser()

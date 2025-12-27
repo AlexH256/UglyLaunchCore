@@ -1,5 +1,5 @@
 import configparser
-from multiinstall import download_files as download_files, download_file as download_file
+from .downloader import download_files as download_files, download_file as download_file
 
 config = configparser.ConfigParser()
 config.read('config.ini')
