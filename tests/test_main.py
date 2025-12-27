@@ -6,4 +6,4 @@ def read_config() :
     conf.read('test_config.ini')
     return conf
 
-installer.list('.minecraft/versionlist/version_manifest.json', 'old_beta')
+installer.install_necc('.minecraft', '1.21.11')
