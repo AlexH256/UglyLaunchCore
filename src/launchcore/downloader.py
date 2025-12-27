@@ -3,8 +3,7 @@ from tqdm import tqdm
 import os
 import shutil
 import uuid
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from urllib.parse import urlparse
+from concurrent.futures import ThreadPoolExecutor
 import sys
 
 
@@ -23,10 +22,17 @@ def download_file(url, dest_path, progress_bar=True, cache_dir=None, skip_move=F
         tuple: (success, message[, cache_path]) 成功返回True和文件路径，失败返回False和错误信息。
                如果skip_move为True且cache_dir已提供，返回三元组(success, message, cache_path)
     """
+
+    def _cleanup_cache(path: str) -> None:
+        if path and os.path.exists(path):
+            try:
+                os.remove(path)
+            except:
+                pass
+
+    cache_path: str = ""
     try:
         # 确定最终下载路径
-        final_dest_path = dest_path
-        cache_path = ""
 
         if cache_dir is not None:
             # 创建缓存目录
@@ -101,25 +107,13 @@ def download_file(url, dest_path, progress_bar=True, cache_dir=None, skip_move=F
 
     except requests.exceptions.RequestException as e:
         # 下载失败，清理可能已创建的缓存文件
-        if cache_path and os.path.exists(cache_path):  # type: ignore
-            try:
-                os.remove(cache_path)  # type: ignore
-            except:
-                pass
+        _cleanup_cache(cache_path)  # type: ignore
         return False, f"下载失败: {e}"
     except OSError as e:
-        if cache_path and os.path.exists(cache_path):
-            try:
-                os.remove(cache_path)
-            except:
-                pass
+        _cleanup_cache(cache_path)  # type: ignore
         return False, f"文件写入失败: {e}"
     except Exception as e:
-        if cache_path and os.path.exists(cache_path):
-            try:
-                os.remove(cache_path)
-            except:
-                pass
+        _cleanup_cache(cache_path)  # type: ignore
         return False, f"未知错误: {e}"
 
 
@@ -137,6 +131,15 @@ def download_files(urls, dest_paths, max_workers=5, progress_bar=True, cache_dir
     Returns:
         list: 每个下载任务的结果列表，每个元素为(success, message)元组
     """
+
+    def _cleanup_paths(paths):
+        for path in paths:
+            if os.path.exists(path):
+                try:
+                    os.remove(path)
+                except:
+                    pass
+
     if len(urls) != len(dest_paths):
         raise ValueError("urls和dest_paths长度必须相同")
 
@@ -202,20 +205,10 @@ def download_files(urls, dest_paths, max_workers=5, progress_bar=True, cache_dir
                     # 移动失败，更新结果
                     results[i] = (False, f"文件移动失败: {move_error}")
             # 清理缓存目录（删除可能残留的文件）
-            try:
-                for cache_path in cache_paths:
-                    if os.path.exists(cache_path):
-                        os.remove(cache_path)
-            except:
-                pass
+            _cleanup_paths(cache_paths)
         else:
             # 有失败，清理已下载的缓存文件
-            try:
-                for cache_path in cache_paths:
-                    if os.path.exists(cache_path):
-                        os.remove(cache_path)
-            except:
-                pass
+            _cleanup_paths(cache_paths)
 
     return results
 
