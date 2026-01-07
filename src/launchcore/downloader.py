@@ -45,7 +45,7 @@ def download_file(
         url (str): 文件下载URL
         dest_path (str): 目标文件路径（包含文件名）
         progress_bar (bool): 是否显示进度条
-        cache_dir (str, optional): 缓存目录路径，如果提供则先下载到缓存目录，全部完成后移动到目标位置
+        cache_dir (str, optional): 缓存目录路径，如果提供则先下载到缓存目录，下载完成后根据skip_move参数决定是否移动
         skip_move (bool, optional): 如果为True且cache_dir已提供，则只下载到缓存目录，不移动文件
 
     Returns:
@@ -153,7 +153,7 @@ def download_files(
         dest_paths (list): 目标文件路径列表（长度必须与urls相同）
         max_workers (int): 最大并发下载数
         progress_bar (bool): 是否显示进度条
-        cache_dir (str, optional): 缓存目录路径，如果提供则先下载到缓存目录，全部完成后移动到目标位置
+        cache_dir (str, optional): 缓存目录路径，如果提供则先下载到缓存目录，下载完成后将成功的文件移动到目标位置
 
     Returns:
         list: 每个下载任务的结果列表，每个元素为(success, message)元组
@@ -207,22 +207,19 @@ def download_files(
                 results.append((False, f"任务执行异常: {e}"))
                 cache_paths.append(None)
 
-        # 判断是否全部成功
-        if success_count == len(urls):
-            # 全部成功，移动文件
-            for i, (dest_path, cache_path) in enumerate(zip(dest_paths, cache_paths)):
-                if cache_path is None:
-                    continue
-                try:
-                    _ensure_dir_exists(os.path.dirname(dest_path))
-                    shutil.move(cache_path, dest_path)
-                except Exception as move_error:
-                    # 移动失败，更新结果
-                    results[i] = (False, f"文件移动失败: {move_error}")
-            # 清理缓存目录（删除可能残留的文件）
-            _cleanup_files(cache_paths)
-        else:
-            # 有失败，清理已下载的缓存文件
-            _cleanup_files([cp for cp in cache_paths if cp is not None])
+        # 移动所有下载成功的文件
+        for i, (dest_path, cache_path) in enumerate(zip(dest_paths, cache_paths)):
+            if cache_path is None:
+                continue
+            try:
+                _ensure_dir_exists(os.path.dirname(dest_path))
+                shutil.move(cache_path, dest_path)
+            except Exception as move_error:
+                # 移动失败，更新结果并清理缓存文件
+                results[i] = (False, f"文件移动失败: {move_error}")
+                _cleanup_file(cache_path)
+
+        # 清理所有缓存文件（移动成功的文件已不存在，清理操作无害）
+        _cleanup_files([cp for cp in cache_paths if cp is not None])
 
     return results
