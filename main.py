@@ -15,6 +15,7 @@ def setup() :
     parser_installer = subparsers.add_parser('installer', help = '下载管理器')
     parser_installer.add_argument('-U', '--update', action = 'store_true', help = '更新版本清单')
     parser_installer.add_argument('-L', '--list', nargs = '?', const = 'all', default = None, help = '列出可下载版本', metavar = 'type')
+    parser_installer.add_argument('--complete', default = None, help = '补全游戏文件', metavar = 'version')
     parser_installer.set_defaults(func = installer.main, subparser = parser_installer)
 
     return parser

@@ -86,7 +86,7 @@ def download_file(
                     unit="B",
                     unit_scale=True,
                     desc=filename,
-                    leave=False,
+                    leave=True,
                     file=sys.stdout,
                     ncols=100,
                     ascii=True,
